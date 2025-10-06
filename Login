@@ -1,0 +1,57 @@
+package lab7;
+
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.*;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.*;
+
+@WebServlet(name = "Login", urlPatterns = {"/login"}, loadOnStartup = 1)
+public class Login extends HttpServlet {
+    @Override
+    public void init() throws ServletException {
+        List<User> users = new ArrayList<>();
+        users.add(new User("John Doe", "jdoe", "abcd"));  // required
+        users.add(new User("Jane Smith", "jsmith", "1234")); // extra
+
+        getServletContext().setAttribute("users", users);
+    }
+
+    // (b) doGet → show login form
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+            throws IOException {
+        response.setContentType("text/html");
+        PrintWriter out = response.getWriter();
+
+        out.println("<h2>Login</h2>");
+        out.println("<form method='post' action='login'>");
+        out.println("Username: <input type='text' name='username'><br>");
+        out.println("Password: <input type='password' name='password'><br>");
+        out.println("<input type='submit' value='Login'>");
+        out.println("</form>");
+    }
+
+    // (c) doPost → check login
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+            throws IOException {
+        String username = request.getParameter("username");
+        String password = request.getParameter("password");
+
+        List<User> users = (List<User>) getServletContext().getAttribute("users");
+
+        for (User u : users) {
+            if (u.getUsername().equals(username) && u.getPassword().equals(password)) {
+                HttpSession session = request.getSession();
+                session.setAttribute("user", u);
+                response.sendRedirect("members");
+                return;
+            }
+        }
+
+        // login failed
+        response.sendRedirect("login");
+    }
+}
