@@ -1,0 +1,28 @@
+package lab7;
+
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.*;
+import java.io.IOException;
+import java.io.PrintWriter;
+
+@WebServlet(name = "Members", urlPatterns = {"/members"})
+public class Members extends HttpServlet {
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+            throws IOException {
+        HttpSession session = request.getSession(false);
+
+        if (session == null || session.getAttribute("user") == null) {
+            response.sendRedirect("login");
+            return;
+        }
+
+        User user = (User) session.getAttribute("user");
+
+        response.setContentType("text/html");
+        PrintWriter out = response.getWriter();
+        out.println("<h2>Hi, " + user.getName() + "! Welcome to the Members Area!</h2>");
+        out.println("<a href='logout'>Logout</a>");
+    }
+}
